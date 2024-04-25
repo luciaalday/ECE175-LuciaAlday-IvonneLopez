@@ -15,13 +15,19 @@ typedef struct {
   char action[15];
 } card;
 
+typedef struct {
+  card hand[7];
+} player;
+
 void setup(p);
 
 int main()
 {
-  int p; //players 
+  int* p; //players 
   printf("Enter the number of players: ");
-  scanf("%d", &p);
+  scanf("%d", p);
+
+  player player_array[*p]; 
   
 
     return 0;
