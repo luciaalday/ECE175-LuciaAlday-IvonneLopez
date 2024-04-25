@@ -20,7 +20,8 @@ typedef struct {
   card hand[7];
 } player;
 
-void setup(p);
+void setup();
+void round();
 
 int main()
 {
@@ -29,11 +30,13 @@ int main()
   scanf("%d", p);
   bool winner = false;
 
-  player player_array[*p]; 
+  player player_array[*p];
+
+  setup(p);
 
   while (winner = false){
     for(int i = 0; i <= player_array; i++){
-      setup(p);
+      round(p);
     }
   }
   
@@ -43,4 +46,8 @@ int main()
 
 void setup(int *p){
   
+}
+
+void round() {
+
 }
