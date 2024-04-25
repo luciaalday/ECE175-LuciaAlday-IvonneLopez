@@ -15,9 +15,14 @@ typedef struct {
   char action[15];
 } card;
 
+void setup(p);
+
 int main()
 {
-    /**/
+  int p; //players 
+  printf("Enter the number of players: ");
+  scanf("%d", &p);
+  
 
     return 0;
 }
