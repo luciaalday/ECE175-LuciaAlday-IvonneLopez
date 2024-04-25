@@ -35,7 +35,7 @@ int main()
   setup(p);
 
   while (winner = false){
-    for(int i = 0; i <= player_array; i++){
+    for(int i = 0; i <= *p; i++){
       round(p);
     }
   }
