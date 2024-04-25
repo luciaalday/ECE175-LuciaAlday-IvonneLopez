@@ -9,6 +9,7 @@
  ********************************************************************/
 
 #include <stdio.h>
+#include <bool.h>
 
 typedef struct {
   int value;
@@ -26,9 +27,20 @@ int main()
   int* p; //players 
   printf("Enter the number of players: ");
   scanf("%d", p);
+  bool winner = false;
 
   player player_array[*p]; 
+
+  while (winner = false){
+    for(int i = 0; i <= player_array; i++){
+      setup(p);
+    }
+  }
   
 
     return 0;
+}
+
+void setup(int *p){
+  
 }
