@@ -39,8 +39,13 @@ int main()
     cardsfile(filename);
   }
   else if (choice == 's'){
-    shuffleDeck(); //random numbers 
+    shuffleDeck(); //calls function that shuffles deck  
   }
+  else {
+    printf("Invalid choice.");
+    return -1;
+  }
+  
   printf("Enter the number of players: ");
   scanf("%d", p);
   bool winner = false;
