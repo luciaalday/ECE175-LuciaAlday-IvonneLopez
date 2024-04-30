@@ -6,12 +6,6 @@
  *** (gameplay and rules and how theyre implemented)
  *** (card struct)
  *** (deck struct)
-
- * Implemented extra credit:
- *   Personalized name
- *   Play a full game (reshuffle deck)
- *   Additional players (asks user for and plays for 2-4 players)
- *   Graphics (?)
  ********************************************************************/
 
 #include <stdio.h>
@@ -25,7 +19,6 @@ typedef struct {
   int value;
   char action[15];
   bool used;
-  bool protected;
 } card;
 
 typedef struct {
@@ -33,15 +26,16 @@ typedef struct {
   char name[20]; 
 } player;
 
-void setup();
+void setup(int SIZE, player player_array[], card deck[]);
+void quicksort(card cardsarray[], int low, int high);
+void swap(card *a, card *b);
+int partition(card cardsarray[], int low, int high);
 void cardsfile();
 void shuffleDeck(card deck[]);
 void createRandomDeck(card deck[]);
 void printDeck(card deck[]);
 void playRound(player player_array[], card deck[], card faceUp[]);
 card drawCard(card deck[]);
-void printHand(player p);
-bool checkWin(player player_array[]);
 
 /***********************************************************************
  * MAIN
@@ -60,10 +54,10 @@ int main()
   if (choice == 'f') {
     char filename[40]; 
     scanf("%s", filename);
-    cardsfile(filename);
+    cardsfile(filename); //calls function that scans file
   }
   else if (choice == 's') {
-    createRandomDeck(deck);
+    createRandomDeck(deck); //calls function  that generate random cards
   }
   else {
     printf("Invalid choice.");
@@ -78,72 +72,69 @@ int main()
 
   player player_array[SIZE];
 
-  setup(SIZE, player_array);
+  setup(SIZE, player_array, deck);
 
   while (winner = false){
     for(int i = 0; i <= SIZE; i++){
       playRound(player_array, deck, faceUp);
-      if (checkWin(player_array)) {
-        printf("Game has ended.");
-        return 1;
-      }
     }
   }
-  
-
     return 0;
 }
 
 /***********************************************************************
  * SETUP
  ************************************************************************/
-void setup(int SIZE, player player_array[]){
-  return;
+void setup(int SIZE, player player_array[], card deck[]){
+  int playercards = 0;
+  int i, j;
+  
+  
+  for (i = 0; i <= SIZE ; i++){ //gives ecah player 7 cards
+    for (j = 0; j <= 7; j++){
+      card temp = drawCard(deck);
+      player_array[i].hand[j] = temp;
+    }
+  }
+
+  //while(){
+  //player[i][j] = 0;
+  for (i = 0; i <= SIZE; i++){
+    quicksort(player_array[i].hand, 0, 6);
+   } 
+ }
+
+void quicksort(card cardsarray[], int low, int high){ //quicksort function
+  if(low < high) {
+    int pivotindex = partition(cardsarray, low, high); //partition the array
+    quicksort(cardsarray, low, pivotindex - 1); //sort cards before and after partition
+    quicksort(cardsarray, pivotindex + 1, high);
+  }
+}
+void swap(card *a, card *b){ //swaps the cards
+  card temp = *a;
+  *a = *b;
+  *b = temp;
+}
+int partition(card cardsarray[], int low, int high){
+  card pivot = cardsarray[high];
+  int i = low - 1; //index of smaller card number
+
+  for(int j = low; j < high; j++){
+    if (cardsarray[j].value <= pivot.value) {
+      i++;
+      swap(&cardsarray[i], &cardsarray[j]);
+    }
+  }
+swap(&cardsarray[i+1], &cardsarray[high]);
+  return i + 1;
 }
 
 /***********************************************************************
  * ROUND
  ************************************************************************/
 void playRound(player player_array[], card deck[], card  faceUp[]) {
-  card drawn = drawCard(deck);
   return;
-}
-
-/***********************************************************************
- * CHECK WIN
- ************************************************************************/
-bool checkWin(player player_array[]) {
-  int length;
-  bool winner = false;
-  for (int i = 0; i < sizeof(player_array); i++) {
-    length = 0;
-    for (int j = 1; j < 7; j++) {
-      if (player_array[i].hand[j].value > player_array[i].hand[j].value) {
-        length++;
-      }
-    }
-    if (length == 7) {
-      printf("Congrats %s!\n", player_array[i].name);
-      winner = true;
-    }
-  }
-  return winner;
-}
-
-/***********************************************************************
- * PRINT HAND
- ************************************************************************/
-void printHand(player p) {
-  printf("%s:\n  oo o\nx||", p.name);
-  for (int i = 0; i < 7; i++) {
-    printf("  %d  |", p.hand[i].value);
-  }
-  printf("\n");
-  for (int j = 0; j < 7; j++) {
-    printf("");
-  }
-  printf("\n");
-
 }
 
 /***********************************************************************
@@ -213,18 +204,6 @@ void printAvailableDeck(card deck[]) {
 card drawCard(card deck[]) {
   int index = rand() % 84;
   card drawn = deck[index];
-  bool needsReshuffle = true;
-  for (int i = 0; i < MAX_CARDS; i++) {
-    if (!deck[i].used) {
-      needsReshuffle = false;
-      break;
-    }
-  }
-  if (needsReshuffle) {
-    for (int j = 0; j < MAX_CARDS; j++) {
-      deck[j].used = false;
-    }
-  }
   while (drawn.used) {
     index = rand() % 84;
     drawn = deck[index];
