@@ -31,6 +31,12 @@ void shuffleDeck(card deck[]);
 void createRandomDeck(card deck[]);
 void printDeck(card deck[]);
 
+/***********************************************************************
+ * MAIN
+ * 
+ * creates deck
+ ************************************************************************/
+
 int main()
 {
   card deck[MAX_CARDS];
@@ -73,14 +79,29 @@ int main()
     return 0;
 }
 
+/***********************************************************************
+ * SETUP
+ * 
+ * creates deck
+ ************************************************************************/
 void setup(int p){
   return;
 }
 
+/***********************************************************************
+ * ROUND
+ * 
+ * creates deck
+ ************************************************************************/
 void round() {
   return;
 }
 
+/***********************************************************************
+ * CARDS FILE
+ * 
+ * creates deck
+ ************************************************************************/
 void cardsfile(char *filename){ //if user enters file 
 card drawPile[MAX_CARDS];
   FILE *in;
@@ -98,6 +119,11 @@ card drawPile[MAX_CARDS];
   }
 }
 
+/***********************************************************************
+ * CREATE RANDOM DECK
+ * 
+ * creates deck
+ ************************************************************************/
 void createRandomDeck(card deck[]) { //if user chooses shuffle deck
     //random function
     char actions[8][15] =  {"swapAdjacent", "swapOver", "moveRight", "moveLeft", "removeLeft", "removeMiddle", "removeRight", "protect"};
@@ -111,6 +137,11 @@ void createRandomDeck(card deck[]) { //if user chooses shuffle deck
     }
 }
 
+/***********************************************************************
+ * SHUFFLE DECK
+ * 
+ * creates deck
+ ************************************************************************/
 void shuffleDeck(card deck[]) {
   for (int i = 0; i < MAX_CARDS; i++) {
     int temp = rand() % 84;
@@ -122,6 +153,11 @@ void shuffleDeck(card deck[]) {
   return;
 }
 
+/***********************************************************************
+ * PRINT DECK
+ * 
+ * creates deck
+ ************************************************************************/
 void printDeck(card deck[]) {
   for (int i = 0; i < MAX_CARDS; i++) {
     printf("Value %d has action %s\n", deck[i].value, deck[i].action);
