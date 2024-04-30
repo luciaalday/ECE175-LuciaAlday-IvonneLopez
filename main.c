@@ -18,29 +18,32 @@
 typedef struct {
   int value;
   char action[15];
+  bool used;
 } card;
 
 typedef struct {
   card hand[7];
+  char name[20]; 
 } player;
 
 void setup();
-void round();
 void cardsfile();
 void shuffleDeck(card deck[]);
 void createRandomDeck(card deck[]);
 void printDeck(card deck[]);
+void playRound(player player_array[], card deck[], card faceUp[]);
+card drawCard(card deck[]);
 
 /***********************************************************************
  * MAIN
  * 
  * creates deck
  ************************************************************************/
-
 int main()
 {
   card deck[MAX_CARDS];
-  int p; //players 
+  card faceUp[8];
+  int SIZE; //players 
   char choice;
   printf("Enter 'f' if to play you want to insert a file or enter 's' if you want to shuffle the deck: ");
   scanf("%c", &choice);
@@ -59,19 +62,18 @@ int main()
   }
 
   shuffleDeck(deck); //calls function that shuffles deck
-  printDeck(deck);
   
   printf("Enter the number of players: ");
-  scanf("%d", p);
+  scanf("%d", SIZE);
   bool winner = false;
 
-  player player_array[4];
+  player player_array[SIZE];
 
-  setup(p);
+  setup();
 
   while (winner = false){
-    for(int i = 0; i <= p; i++){
-      round(p);
+    for(int i = 0; i <= SIZE; i++){
+      playRound(player_array, deck, faceUp);
     }
   }
   
@@ -81,26 +83,20 @@ int main()
 
 /***********************************************************************
  * SETUP
- * 
- * creates deck
  ************************************************************************/
-void setup(int p){
+void setup(){
   return;
 }
 
 /***********************************************************************
  * ROUND
- * 
- * creates deck
  ************************************************************************/
-void round() {
+void playRound(player player_array[], card deck[], card  faceUp[]) {
   return;
 }
 
 /***********************************************************************
- * CARDS FILE
- * 
- * creates deck
+ * CARDS FILE - creates deck from file
  ************************************************************************/
 void cardsfile(char *filename){ //if user enters file 
 card drawPile[MAX_CARDS];
@@ -121,16 +117,14 @@ card drawPile[MAX_CARDS];
 
 /***********************************************************************
  * CREATE RANDOM DECK
- * 
- * creates deck
  ************************************************************************/
 void createRandomDeck(card deck[]) { //if user chooses shuffle deck
-    //random function
     char actions[8][15] =  {"swapAdjacent", "swapOver", "moveRight", "moveLeft", "removeLeft", "removeMiddle", "removeRight", "protect"};
     int random;
     for (int i = 0; i < MAX_CARDS; i++) {
       random = rand() % 8;
       card temp;
+      temp.used = false;
       temp.value = i;
       strcpy(temp.action, actions[random]);
       deck[i] = temp;
@@ -139,8 +133,6 @@ void createRandomDeck(card deck[]) { //if user chooses shuffle deck
 
 /***********************************************************************
  * SHUFFLE DECK
- * 
- * creates deck
  ************************************************************************/
 void shuffleDeck(card deck[]) {
   for (int i = 0; i < MAX_CARDS; i++) {
@@ -154,12 +146,25 @@ void shuffleDeck(card deck[]) {
 }
 
 /***********************************************************************
- * PRINT DECK
- * 
- * creates deck
+ * PRINT DECK - used to test functionality (not in gameplay)
  ************************************************************************/
-void printDeck(card deck[]) {
+void printAvailableDeck(card deck[]) {
   for (int i = 0; i < MAX_CARDS; i++) {
-    printf("Value %d has action %s\n", deck[i].value, deck[i].action);
+    if (!deck[i].used) {
+      printf("Value %d has action %s\n", deck[i].value, deck[i].action);
+    }
   }
+}
+
+/***********************************************************************
+ * DRAW CARD
+ ************************************************************************/
+card drawCard(card deck[]) {
+  int index = rand() % 84;
+  card drawn = deck[index];
+  while (drawn.used) {
+    index = rand() % 84;
+    drawn = deck[index];
+  }
+  return drawn;
 }
