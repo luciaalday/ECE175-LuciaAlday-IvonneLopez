@@ -9,7 +9,7 @@
  ********************************************************************/
 
 #include <stdio.h>
-#include <bool.h>
+#include <stdbool.h>
 #define MAX_CARDS 84
 
 typedef struct {
@@ -34,7 +34,7 @@ int main()
   scanf("%c", &choice);
 
   if (choice == 'f') {
-    char filename[]; 
+    char filename[40]; 
     scanf("%s", &filename);
     cardsfile(filename);
   }
@@ -72,20 +72,23 @@ void round() {
 
 }
 void cardsfile(char *filename){ //if user enters file 
+card drawPile[MAX_CARDS];
   FILE *in;
   in = fopen(filename, "r");
-  if (file == NULL){
+  if (in == NULL){
     printf("The file does not exist");
     return -1;
   }
   else {
-    index = 0;
+    int index = 0;
     //scan cards from file
-    while(index < MAX_CARDS && fscanf(file, "%d %s, &drawPile[index].value == 1) //scans card value and card action {
+    while(index < MAX_CARDS && fscanf(in, "%d %s", &drawPile[index].value) == 1) { //scans card value and card action
       index++;
       } //drawPile[index].action)==2
   }
 }
-  void shuffleDeck () { //if user chooses shuffle deck
-      //random function
-  }
+
+void shuffleDeck () { //if user chooses shuffle deck
+    //random function
+    return;
+}
