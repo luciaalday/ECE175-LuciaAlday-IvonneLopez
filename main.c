@@ -26,6 +26,7 @@ typedef struct {
   char action[15];
   bool used;
   bool protected;
+  char actionString[3];
 } card;
 
 typedef struct {
@@ -33,15 +34,18 @@ typedef struct {
   char name[20]; 
 } player;
 
-void setup();
+void setup(int SIZE, player player_array[], card deck[]);
+void quicksort(card cardsarray[], int low, int high);
+void swap(card *a, card *b);
+int partition(card cardsarray[], int low, int high);
 void cardsfile();
 void shuffleDeck(card deck[]);
 void createRandomDeck(card deck[]);
-void printDeck(card deck[]);
+void printAvailableDeck(card deck[]);
 void playRound(player player_array[], card deck[], card faceUp[]);
 card drawCard(card deck[]);
 void printHand(player p);
-bool checkWin(player player_array[]);
+bool checkWin(int SIZE, player player_array[]);
 
 /***********************************************************************
  * MAIN
@@ -60,10 +64,10 @@ int main()
   if (choice == 'f') {
     char filename[40]; 
     scanf("%s", filename);
-    cardsfile(filename);
+    cardsfile(filename); //calls function that scans file
   }
   else if (choice == 's') {
-    createRandomDeck(deck);
+    createRandomDeck(deck);//calls function  that generate random cards
   }
   else {
     printf("Invalid choice.");
@@ -77,13 +81,37 @@ int main()
   bool winner = false;
 
   player player_array[SIZE];
+  char tempName[30];
 
-  setup(SIZE, player_array);
+  char discard[5];
+  fgets(discard, 5, stdin);
 
-  while (winner = false){
+
+  for (int i = 0; i < SIZE; i++) {
+    printf("Enter player %d name: ", i);
+    fgets(player_array[i].name, 30, stdin);
+  }
+  /*delete this later*/
+  printAvailableDeck(deck);
+
+  player_array[0].hand[0] = drawCard(deck);
+  player_array[0].hand[1] = drawCard(deck);
+  player_array[0].hand[2] = drawCard(deck);
+  player_array[0].hand[3] = drawCard(deck);
+  player_array[0].hand[4] = drawCard(deck);
+  player_array[0].hand[5] = drawCard(deck);
+  player_array[0].hand[6] = drawCard(deck);
+
+  printAvailableDeck(deck);
+
+  printHand(player_array[0]);
+  /*delete this later*/
+  setup(SIZE, player_array, deck);
+
+  while (winner == false){
     for(int i = 0; i <= SIZE; i++){
       playRound(player_array, deck, faceUp);
-      if (checkWin(player_array)) {
+      if (checkWin(SIZE, player_array)) {
         printf("Game has ended.");
         return 1;
       }
@@ -95,14 +123,54 @@ int main()
 }
 
 /***********************************************************************
- * SETUP
+ * SETUP (int SIZE, plaer player_array[])
  ************************************************************************/
-void setup(int SIZE, player player_array[]){
-  return;
+void setup(int SIZE, player player_array[], card deck[]){
+  int playercards = 0;
+  int i, j;
+  
+  
+  for (i = 0; i <= SIZE ; i++){ //gives ecah player 7 cards
+    for (j = 0; j <= 7; j++){
+      card temp = drawCard(deck);
+      player_array[i].hand[j] = temp;
+    }
+  }
+
+  //while(){
+  //player[i][j] = 0;
+  for (i = 0; i <= SIZE; i++){
+    quicksort(player_array[i].hand, 0, 6);
+   } 
+ }
+ void quicksort(card cardsarray[], int low, int high){ //quicksort function
+  if(low < high) {
+    int pivotindex = partition(cardsarray, low, high); //partition the array
+    quicksort(cardsarray, low, pivotindex - 1); //sort cards before and after partition
+    quicksort(cardsarray, pivotindex + 1, high);
+  }
+}
+void swap(card *a, card *b){ //swaps the cards
+  card temp = *a;
+  *a = *b;
+  *b = temp;
+}
+int partition(card cardsarray[], int low, int high){
+  card pivot = cardsarray[high];
+  int i = low - 1; //index of smaller card number
+
+  for(int j = low; j < high; j++){
+    if (cardsarray[j].value <= pivot.value) {
+      i++;
+      swap(&cardsarray[i], &cardsarray[j]);
+    }
+  }
+swap(&cardsarray[i+1], &cardsarray[high]);
+  return i + 1;
 }
 
 /***********************************************************************
- * ROUND
+ * ROUND (player player_array[], card deck[], card faceUp[])
  ************************************************************************/
 void playRound(player player_array[], card deck[], card  faceUp[]) {
   card drawn = drawCard(deck);
@@ -110,15 +178,15 @@ void playRound(player player_array[], card deck[], card  faceUp[]) {
 }
 
 /***********************************************************************
- * CHECK WIN
+ * CHECK WIN (player player_array[]) Returns boolean
  ************************************************************************/
-bool checkWin(player player_array[]) {
+bool checkWin(int SIZE, player player_array[]) {
   int length;
   bool winner = false;
-  for (int i = 0; i < sizeof(player_array); i++) {
+  for (int i = 0; i < SIZE; i++) {
     length = 0;
     for (int j = 1; j < 7; j++) {
-      if (player_array[i].hand[j].value > player_array[i].hand[j].value) {
+      if (player_array[i].hand[j].value > player_array[i].hand[j-1].value) {
         length++;
       }
     }
@@ -131,18 +199,23 @@ bool checkWin(player player_array[]) {
 }
 
 /***********************************************************************
- * PRINT HAND
+ * PRINT HAND (player p)
  ************************************************************************/
 void printHand(player p) {
-  printf("%s:\n  oo o\nx||", p.name);
+  printf("%s:\n   OOo Oo o\n  O________________________________________________\n ||", p.name);
   for (int i = 0; i < 7; i++) {
-    printf("  %d  |", p.hand[i].value);
+    if (p.hand[i].value <10) {
+      printf("   %d  |", p.hand[i].value);
+    }
+    else {
+      printf("  %d  |", p.hand[i].value);
+    }
   }
-  printf("\n");
+  printf("\nx||");
   for (int j = 0; j < 7; j++) {
-    printf("");
+    printf(" %s  |", p.hand[j].actionString);
   }
-  printf("\n");
+  printf("\n    oo---oo---oo---oo---oo---oo---oo---oo---oo---oo\n");
 
 }
 
@@ -160,17 +233,18 @@ card drawPile[MAX_CARDS];
   else {
     int index = 0;
     //scan cards from file
-    while(index < MAX_CARDS && fscanf(in, "%d %s", &drawPile[index].value) == 1) { //scans card value and card action
+    while(index < MAX_CARDS && fscanf(in, "%d %s", &drawPile[index].value, drawPile[index].action) == 1) { //scans card value and card action
       index++;
       } //drawPile[index].action)==2
   }
 }
 
 /***********************************************************************
- * CREATE RANDOM DECK
+ * CREATE RANDOM DECK (card deck[]) //empty deck
  ************************************************************************/
 void createRandomDeck(card deck[]) { //if user chooses shuffle deck
     char actions[8][15] =  {"swapAdjacent", "swapOver", "moveRight", "moveLeft", "removeLeft", "removeMiddle", "removeRight", "protect"};
+    char actionStrings[8][3] = {"SS_", "S_S", "M_R", "M_L", "X__", "_X_", "__X", "XXX"};
     int random;
     for (int i = 0; i < MAX_CARDS; i++) {
       random = rand() % 8;
@@ -178,22 +252,22 @@ void createRandomDeck(card deck[]) { //if user chooses shuffle deck
       temp.used = false;
       temp.value = i;
       strcpy(temp.action, actions[random]);
+      strcpy(temp.actionString, actionStrings[random]);
       deck[i] = temp;
     }
 }
 
 /***********************************************************************
- * SHUFFLE DECK
+ * SHUFFLE DECK (card deck[])
  ************************************************************************/
 void shuffleDeck(card deck[]) {
+  card tempCard;
   for (int i = 0; i < MAX_CARDS; i++) {
     int temp = rand() % 84;
-    card tempCard;
     tempCard = deck[i];
     deck[i] = deck[temp];
     deck[temp] = tempCard;
   }
-  return;
 }
 
 /***********************************************************************
@@ -202,13 +276,13 @@ void shuffleDeck(card deck[]) {
 void printAvailableDeck(card deck[]) {
   for (int i = 0; i < MAX_CARDS; i++) {
     if (!deck[i].used) {
-      printf("Value %d has action %s\n", deck[i].value, deck[i].action);
+      printf("Value %d has action %s (%s)\n", deck[i].value, deck[i].action, deck[i].actionString);
     }
   }
 }
 
 /***********************************************************************
- * DRAW CARD
+ * DRAW CARD (card deck[]) Returns card
  ************************************************************************/
 card drawCard(card deck[]) {
   int index = rand() % 84;
