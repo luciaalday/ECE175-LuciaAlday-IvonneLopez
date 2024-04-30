@@ -12,6 +12,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 #define MAX_CARDS 84
 
 typedef struct {
@@ -26,10 +27,13 @@ typedef struct {
 void setup();
 void round();
 void cardsfile();
-void shuffleDeck();
+void shuffleDeck(card deck[]);
+void createRandomDeck(card deck[]);
+void printDeck(card deck[]);
 
 int main()
 {
+  card deck[MAX_CARDS];
   int* p; //players 
   char choice;
   printf("Enter 'f' if to play you want to insert a file or enter 's' if you want to shuffle the deck: ");
@@ -40,24 +44,27 @@ int main()
     scanf("%s", &filename);
     cardsfile(filename);
   }
-  else if (choice == 's'){
-    shuffleDeck(); //calls function that shuffles deck  
+  else if (choice == 's') {
+    createRandomDeck(deck);
   }
   else {
     printf("Invalid choice.");
     return -1;
   }
+
+  shuffleDeck(deck); //calls function that shuffles deck
+  printDeck(deck);
   
   printf("Enter the number of players: ");
   scanf("%d", p);
   bool winner = false;
 
-  player player_array[*p];
+  player player_array[4];
 
   setup(p);
 
   while (winner = false){
-    for(int i = 0; i <= *p; i++){
+    for(int i = 0; i <= p; i++){
       round(p);
     }
   }
@@ -66,13 +73,14 @@ int main()
     return 0;
 }
 
-void setup(int *p){
-  
+void setup(int p){
+  return;
 }
 
 void round() {
-
+  return;
 }
+
 void cardsfile(char *filename){ //if user enters file 
 card drawPile[MAX_CARDS];
   FILE *in;
@@ -90,10 +98,9 @@ card drawPile[MAX_CARDS];
   }
 }
 
-void shuffleDeck () { //if user chooses shuffle deck
+void createRandomDeck(card deck[]) { //if user chooses shuffle deck
     //random function
     char actions[8][15] =  {"swapAdjacent", "swapOver", "moveRight", "moveLeft", "removeLeft", "removeMiddle", "removeRight", "protect"};
-    card deck[MAX_CARDS];
     int random;
     for (int i = 0; i < MAX_CARDS; i++) {
       random = rand() % 8;
@@ -101,8 +108,22 @@ void shuffleDeck () { //if user chooses shuffle deck
       temp.value = i;
       strcpy(temp.action, actions[random]);
       deck[i] = temp;
-      printf("Card has action %s and value %d\n", temp.action, temp.value);
-
     }
-    return;
+}
+
+void shuffleDeck(card deck[]) {
+  for (int i = 0; i < MAX_CARDS; i++) {
+    int temp = rand() % 84;
+    card tempCard;
+    tempCard = deck[i];
+    deck[i] = deck[temp];
+    deck[temp] = tempCard;
+  }
+  return;
+}
+
+void printDeck(card deck[]) {
+  for (int i = 0; i < MAX_CARDS; i++) {
+    printf("Value %d has action %s\n", deck[i].value, deck[i].action);
+  }
 }
