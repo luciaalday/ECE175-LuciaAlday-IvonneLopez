@@ -34,7 +34,7 @@ void printDeck(card deck[]);
 int main()
 {
   card deck[MAX_CARDS];
-  int* p; //players 
+  int p; //players 
   char choice;
   printf("Enter 'f' if to play you want to insert a file or enter 's' if you want to shuffle the deck: ");
   scanf("%c", &choice);
