@@ -10,6 +10,8 @@
 
 #include <stdio.h>
 #include <stdbool.h>
+#include <stdlib.h>
+#include <string.h>
 #define MAX_CARDS 84
 
 typedef struct {
@@ -77,7 +79,7 @@ card drawPile[MAX_CARDS];
   in = fopen(filename, "r");
   if (in == NULL){
     printf("The file does not exist");
-    return -1;
+    return;
   }
   else {
     int index = 0;
@@ -90,5 +92,17 @@ card drawPile[MAX_CARDS];
 
 void shuffleDeck () { //if user chooses shuffle deck
     //random function
+    char actions[8][15] =  {"swapAdjacent", "swapOver", "moveRight", "moveLeft", "removeLeft", "removeMiddle", "removeRight", "protect"};
+    card deck[MAX_CARDS];
+    int random;
+    for (int i = 0; i < MAX_CARDS; i++) {
+      random = rand() % 8;
+      card temp;
+      temp.value = i;
+      strcpy(temp.action, actions[random]);
+      deck[i] = temp;
+      printf("Card has action %s and value %d\n", temp.action, temp.value);
+
+    }
     return;
 }
