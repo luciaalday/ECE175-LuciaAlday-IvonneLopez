@@ -106,7 +106,7 @@ int main()
  ************************************************************************/
 int setup(int SIZE, player player_array[], card deck[]){
   for (int i = 0; i < SIZE; i++) {
-    printf("Enter player %d name: ", i);
+    printf("Enter player %d name: ", i + 1);
     fgets(player_array[i].name, 30, stdin);
   }
   /*delete this later*/
@@ -213,7 +213,7 @@ bool checkWin(int SIZE, player player_array[]) {
  * PRINT HAND (player p)
  ************************************************************************/
 void printHand(player p) {
-  printf("%s:\n   OOo Oo o\n  O________________________________________________\n ||", p.name);
+  printf("%s \n   OOo Oo o\n  O________________________________________________\n ||", p.name);
   for (int i = 0; i < 7; i++) {
     if (p.hand[i].value <10) {
       printf("   %d  |", p.hand[i].value);
@@ -256,9 +256,8 @@ card drawPile[MAX_CARDS];
 void createRandomDeck(card deck[]) { //if user chooses shuffle deck
     char actions[8][15] =  {"swapAdjacent", "swapOver", "moveRight", "moveLeft", "removeLeft", "removeMiddle", "removeRight", "protect"};
     char actionStrings[8][4] = {"SS_", "S_S", "M_R", "M_L", "X__", "_X_", "__X", "XXX"};
-    int random;
     for (int i = 0; i < MAX_CARDS; i++) {
-      random = rand() % 8;
+      int random = rand() % 8;
       card temp;
       temp.used = false;
       temp.value = i;
@@ -274,7 +273,7 @@ void createRandomDeck(card deck[]) { //if user chooses shuffle deck
 void shuffleDeck(card deck[]) {
   card tempCard;
   for (int i = 0; i < MAX_CARDS; i++) {
-    int temp = rand() % 84;
+    int temp = rand() % MAX_CARDS;
     tempCard = deck[i];
     deck[i] = deck[temp];
     deck[temp] = tempCard;
@@ -297,11 +296,9 @@ void printAvailableDeck(card deck[]) {
  ************************************************************************/
 card drawCard(card deck[]) {
   int index = rand() % 84;
-  card drawn = deck[index];
-  while (drawn.used) {
+  while (deck[index].used) {
     index = rand() % 84;
-    drawn = deck[index];
-    deck[index].used = true;
   }
-  return drawn;
+  deck[index].used = true;
+  return deck[index];
 }
