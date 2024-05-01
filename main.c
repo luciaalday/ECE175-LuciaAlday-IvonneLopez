@@ -41,7 +41,7 @@ int playRound(player starting_player, card deck[], card faceUp[], int turn);
 card drawCard(card deck[]);
 void printHand(player p);
 bool checkWin(int SIZE, player player_array[]);
-void endGame(player player_array[]);
+void endGame(player player_array[], int SIZE);
 
 /***********************************************************************
  * MAIN
@@ -88,7 +88,7 @@ int main()
   while (winner == false){
     for (int i = 0; i < SIZE; i++){
       if (starting_index < 0) {
-        endGame(player_array);
+        endGame(player_array, SIZE);
       }
       if (starting_index >= SIZE){
         starting_index = 0;
@@ -171,23 +171,42 @@ int playRound(player starting_player, card deck[], card faceUp[], int turn) {
       return -1;
     }
   }*/
-  
+  printf("Available face-up cards: ");
+  for (int i = 0; i < 8; i++) {
+    if (faceUp[i].action != "\0") {
+      printf("%i %s, ", faceUp[i].value, faceUp[i].actionString);
+    }
+  }
+
   printHand(starting_player);
-  printf("Cards Drawn: ");
-  card tempCard = drawCard(deck);
-  printf("%d", tempCard.value);
-  printf("%s \n", tempCard.actionString);
+  printf("Enter 'd' to draw a card or 'f' to select from the face-up cards.\n");
+  char nextMove;
+  scanf("%c", &nextMove);
+  if (nextMove == 'd') {
+    printf("\nCard Drawn: ");
+    card tempCard = drawCard(deck);
+    printf("%d", tempCard.value);
+    printf("%s \n", tempCard.actionString);
 
-  printf("Choose the position of the card you want to change(0 - 6)");
-  int position;
-  scanf("%i", &position);
+    printf("Choose the position of the card you want to change(0 - 6)");
+    int position;
+    scanf("%i", &position);
 
-  card toFaceUp = starting_player.hand[position];
-  if (faceUp[toFaceUp.actionNum].action == "\0") {
-    faceUp[toFaceUp.actionNum] = toFaceUp;
+    card toFaceUp = starting_player.hand[position];
+    if (faceUp[toFaceUp.actionNum].action == "\0") {
+      faceUp[toFaceUp.actionNum] = toFaceUp;
+  }
+  else if (nextMove == 'f') {
+    // face-up option selected and done
+  }
+  else {
+    printf("Invalid move. Next player's turn.");
   }
 
   starting_player.hand[position] = tempCard;
+
+  }
+
   printHand(starting_player);
 
 
@@ -320,9 +339,9 @@ card drawCard(card deck[]) {
  * END GAME (player player_array[]) Returns card
  ************************************************************************/
 
-void endGame(player player_array[]) {
+void endGame(player player_array[], int SIZE) {
   player currMax = player_array[0];
-  for (int i = 0; i < sizeof(player_array); i++) {
+  for (int i = 0; i < SIZE; i++) {
     player_array[i].len = 0;
     for (int j = 1; j < 7; j++) {
       if (player_array[i].hand[j].value > player_array[i].hand[j - 1].value) {
