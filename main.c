@@ -6,12 +6,6 @@
  *** (gameplay and rules and how theyre implemented)
  *** (card struct)
  *** (deck struct)
-
- * Implemented extra credit:
- *   Personalized name
- *   Play a full game (reshuffle deck)
- *   Additional players (asks user for and plays for 2-4 players)
- *   Graphics (?)
  ********************************************************************/
 
 #include <stdio.h>
@@ -25,7 +19,6 @@ typedef struct {
   int value;
   char action[15];
   bool used;
-  bool protected;
   char actionString[3];
 } card;
 
@@ -34,6 +27,10 @@ typedef struct {
   char name[20]; 
 } player;
 
+void setup(int SIZE, player player_array[], card deck[]);
+void quicksort(card cardsarray[], int low, int high);
+void swap(card *a, card *b);
+int partition(card cardsarray[], int low, int high);
 void setup(int SIZE, player player_array[], card deck[]);
 void quicksort(card cardsarray[], int low, int high);
 void swap(card *a, card *b);
@@ -65,9 +62,10 @@ int main()
     char filename[40]; 
     scanf("%s", filename);
     cardsfile(filename); //calls function that scans file
+    cardsfile(filename); //calls function that scans file
   }
   else if (choice == 's') {
-    createRandomDeck(deck);//calls function  that generate random cards
+    createRandomDeck(deck); //calls function  that generate random cards
   }
   else {
     printf("Invalid choice.");
@@ -117,8 +115,6 @@ int main()
       }
     }
   }
-  
-
     return 0;
 }
 
@@ -143,7 +139,8 @@ void setup(int SIZE, player player_array[], card deck[]){
     quicksort(player_array[i].hand, 0, 6);
    } 
  }
- void quicksort(card cardsarray[], int low, int high){ //quicksort function
+
+void quicksort(card cardsarray[], int low, int high){ //quicksort function
   if(low < high) {
     int pivotindex = partition(cardsarray, low, high); //partition the array
     quicksort(cardsarray, low, pivotindex - 1); //sort cards before and after partition
@@ -173,7 +170,6 @@ swap(&cardsarray[i+1], &cardsarray[high]);
  * ROUND (player player_array[], card deck[], card faceUp[])
  ************************************************************************/
 void playRound(player player_array[], card deck[], card  faceUp[]) {
-  card drawn = drawCard(deck);
   return;
 }
 
@@ -287,18 +283,6 @@ void printAvailableDeck(card deck[]) {
 card drawCard(card deck[]) {
   int index = rand() % 84;
   card drawn = deck[index];
-  bool needsReshuffle = true;
-  for (int i = 0; i < MAX_CARDS; i++) {
-    if (!deck[i].used) {
-      needsReshuffle = false;
-      break;
-    }
-  }
-  if (needsReshuffle) {
-    for (int j = 0; j < MAX_CARDS; j++) {
-      deck[j].used = false;
-    }
-  }
   while (drawn.used) {
     index = rand() % 84;
     drawn = deck[index];
