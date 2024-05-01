@@ -62,7 +62,6 @@ int main()
     char filename[40]; 
     scanf("%s", filename);
     cardsfile(filename); //calls function that scans file
-    cardsfile(filename); //calls function that scans file
   }
   else if (choice == 's') {
     createRandomDeck(deck); //calls function  that generate random cards
@@ -164,23 +163,31 @@ int partition(card cardsarray[], int low, int high) {
 
 /***********************************************************************
  * ROUND (player player_array[], card deck[], card faceUp[])
- * Note that the commented parts of this section relate to unfinished 
- * functionality relating to usage and implementation of faceup cards
  ************************************************************************/
 int playRound(player starting_player, card deck[], card faceUp[], int hasFaceUp[], int turn) {
   printf("Available face-up cards: ");
   for (int i = 0; i < 8; i++) {
     if (hasFaceUp[i] == 1) {
-      printf("%i %s, ", faceUp[i].value, faceUp[i].actionString);
+      printf("%i %s, ", faceUp[i].value, faceUp[i].action);
     }
   }
   printf("\n");
 
   printHand(starting_player);
-  printf("Enter 'd' to draw a card or 'f' to select from the face-up cards.\n");
   char nextMove;
-  scanf("%c", &nextMove);
-  if (nextMove == 'd') {
+  bool hasChoice = false;
+
+  for (int i = 0; i < 8; i++) {     // check if faceUp cards persent
+    if (hasFaceUp[i] == 1) {
+      hasChoice = true;             // player gets to choose whether to pick up card or draw
+      printf("Enter 'd' to draw a card or 'f' to select from the face-up cards.\n");
+      scanf("%c", &nextMove);
+    }
+  }
+  if (!hasChoice) {           // no faceUp cards, must draw from deck
+    nextMove = 'd';
+  }
+  if (nextMove == 'd') {      // if player chooses to draw card (can only use number on card)
     printf("\nCard Drawn: ");
     card tempCard = drawCard(deck);
     if (tempCard.value == 100) {        // checks if deck returns value corresponding to an empty drawPile
@@ -201,22 +208,24 @@ int playRound(player starting_player, card deck[], card faceUp[], int hasFaceUp[
     else {
       hasFaceUp[toFaceUp.actionNum] = 0;
     }
-  /*
-  else if (nextMove == 'f') {
+    starting_player.hand[position] = tempCard;
+  }  
+  else if (nextMove == 'f') {         // if player chooses to select a faceUp card
     // face-up option selected and done
   }
   else {
     printf("Invalid move. Next player's turn.");
-  }*/
-
-  starting_player.hand[position] = tempCard;
-
   }
 
   printHand(starting_player);
 
   return turn;
 }
+
+/***********************************************************************
+ * FACEUP PLAYS SERIES (card action, player player)
+ ************************************************************************/
+
 
 /***********************************************************************
  * CHECK WIN (player player_array[]) Returns boolean
@@ -269,6 +278,10 @@ void cardsfile(char *filename){ //if user enters file
 card drawPile[MAX_CARDS];
   FILE *in;
   in = fopen(filename, "r");
+  char actionList[8][15];
+  for (int i = 0; i < 8; i++) {
+    strcpy(actionList[i], "");
+  }
   if (in == NULL){
     printf("The file does not exist");
     return;
@@ -278,7 +291,18 @@ card drawPile[MAX_CARDS];
     //scan cards from file
     while(index < MAX_CARDS && fscanf(in, "%d %s", &drawPile[index].value, drawPile[index].action) == 1) { //scans card value and card action
       index++;
-      } //drawPile[index].action)==2
+      strncpy(drawPile[index].actionString, drawPile[index].action, 3);
+      for (int i = 0; i < 8; i++) {
+        drawPile[index].actionNum = i;
+        if (strcmp(actionList[i], "") == 0) {          // add new action if actionList[i] is NULL
+          strcpy(actionList[i], drawPile[index].action);
+          break;
+        }                                     // stop when action found
+        else if (strcmp(drawPile[index].action, actionList[i]) == 0) {
+          break;
+        }
+      }
+    } //drawPile[index].action)==2
   }
 }
 
@@ -342,10 +366,10 @@ card drawCard(card deck[]) {
   endGame.value = 100;
   return endGame;
 }
+
 /***********************************************************************
  * END GAME (player player_array[]) Returns card
  ************************************************************************/
-
 void endGame(player player_array[], int SIZE) {
   player currMax = player_array[0];
   for (int i = 0; i < SIZE; i++) {
