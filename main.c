@@ -27,11 +27,7 @@ typedef struct {
   char name[20]; 
 } player;
 
-void setup(int SIZE, player player_array[], card deck[]);
-void quicksort(card cardsarray[], int low, int high);
-void swap(card *a, card *b);
-int partition(card cardsarray[], int low, int high);
-void setup(int SIZE, player player_array[], card deck[]);
+int setup(int SIZE, player player_array[], card deck[]);
 void quicksort(card cardsarray[], int low, int high);
 void swap(card *a, card *b);
 int partition(card cardsarray[], int low, int high);
@@ -39,7 +35,7 @@ void cardsfile();
 void shuffleDeck(card deck[]);
 void createRandomDeck(card deck[]);
 void printAvailableDeck(card deck[]);
-void playRound(player player_array[], card deck[], card faceUp[]);
+int playRound(player starting_player, card deck[], card faceUp[], int turn);
 card drawCard(card deck[]);
 void printHand(player p);
 bool checkWin(int SIZE, player player_array[]);
@@ -85,34 +81,21 @@ int main()
   fgets(discard, 5, stdin);
 
 
-  for (int i = 0; i < SIZE; i++) {
-    printf("Enter player %d name: ", i);
-    fgets(player_array[i].name, 30, stdin);
-  }
+  
   /*delete this later*/
-  printAvailableDeck(deck);
-
-  player_array[0].hand[0] = drawCard(deck);
-  player_array[0].hand[1] = drawCard(deck);
-  player_array[0].hand[2] = drawCard(deck);
-  player_array[0].hand[3] = drawCard(deck);
-  player_array[0].hand[4] = drawCard(deck);
-  player_array[0].hand[5] = drawCard(deck);
-  player_array[0].hand[6] = drawCard(deck);
-
-  printAvailableDeck(deck);
-
-  printHand(player_array[0]);
-  /*delete this later*/
-  setup(SIZE, player_array, deck);
+  int starting_index = setup(SIZE, player_array, deck);
 
   while (winner == false){
-    for(int i = 0; i <= SIZE; i++){
-      playRound(player_array, deck, faceUp);
-      if (checkWin(SIZE, player_array)) {
-        printf("Game has ended.");
-        return 1;
+    for (int i = 0; i < SIZE; i++){
+      if (starting_index >= SIZE){
+        starting_index = 0;
       }
+      starting_index = playRound(player_array[starting_index], deck, faceUp, i+1);
+    }
+
+    if (checkWin(SIZE, player_array)) {
+      printf("Game has ended.");
+      return 1;
     }
   }
     return 0;
@@ -121,56 +104,88 @@ int main()
 /***********************************************************************
  * SETUP (int SIZE, plaer player_array[])
  ************************************************************************/
-void setup(int SIZE, player player_array[], card deck[]){
-  int playercards = 0;
-  int i, j;
-  
-  
-  for (i = 0; i <= SIZE ; i++){ //gives ecah player 7 cards
-    for (j = 0; j <= 7; j++){
-      card temp = drawCard(deck);
-      player_array[i].hand[j] = temp;
+int setup(int SIZE, player player_array[], card deck[]){
+  for (int i = 0; i < SIZE; i++) {
+    printf("Enter player %d name: ", i);
+    fgets(player_array[i].name, 30, stdin);
+  }
+  /*delete this later*/
+  printAvailableDeck(deck);
+
+  for (int p = 0; p < SIZE; p++){
+    for (int c = 0; c < 7; c++){
+      player_array[p].hand[c] = drawCard(deck);
     }
   }
+  for (int i = 0; i <= SIZE; i++){
+    quicksort(player_array[i].hand, 0, 6);
+  } 
+  printAvailableDeck(deck);
 
+  for (int p = 0; p < SIZE; p++){
+    printHand(player_array[p]);
+  }
+
+  return rand() % SIZE;
   //while(){
   //player[i][j] = 0;
-  for (i = 0; i <= SIZE; i++){
-    quicksort(player_array[i].hand, 0, 6);
-   } 
+  
  }
 
-void quicksort(card cardsarray[], int low, int high){ //quicksort function
-  if(low < high) {
-    int pivotindex = partition(cardsarray, low, high); //partition the array
-    quicksort(cardsarray, low, pivotindex - 1); //sort cards before and after partition
-    quicksort(cardsarray, pivotindex + 1, high);
-  }
-}
-void swap(card *a, card *b){ //swaps the cards
-  card temp = *a;
-  *a = *b;
-  *b = temp;
-}
-int partition(card cardsarray[], int low, int high){
-  card pivot = cardsarray[high];
-  int i = low - 1; //index of smaller card number
-
-  for(int j = low; j < high; j++){
-    if (cardsarray[j].value <= pivot.value) {
-      i++;
-      swap(&cardsarray[i], &cardsarray[j]);
+void quicksort(card cardsarray[], int low, int high) {
+    if (low < high) {
+        int pivotindex = partition(cardsarray, low, high); // partition the array
+        quicksort(cardsarray, low, pivotindex - 1);       // sort cards before partition
+        quicksort(cardsarray, pivotindex + 1, high);      // sort cards after partition
     }
-  }
-swap(&cardsarray[i+1], &cardsarray[high]);
-  return i + 1;
 }
+
+void swap(card *a, card *b) { // swaps the cards
+    card temp = *a;
+    *a = *b;
+    *b = temp;
+}
+
+int partition(card cardsarray[], int low, int high) {
+    card pivot = cardsarray[high];
+    int i = low - 1; // index of smaller card number
+
+    for (int j = low; j < high; j++) {
+        if (cardsarray[j].value >= pivot.value) { // Change comparison to >= for descending order
+            i++;
+            swap(&cardsarray[i], &cardsarray[j]);
+        }
+    }
+    swap(&cardsarray[i + 1], &cardsarray[high]);
+    return i + 1;
+}
+
 
 /***********************************************************************
  * ROUND (player player_array[], card deck[], card faceUp[])
  ************************************************************************/
-void playRound(player player_array[], card deck[], card  faceUp[]) {
-  return;
+int playRound(player starting_player, card deck[], card  faceUp[], int turn) {
+  for (int i = 0; i < turn; i++){
+    faceUp[i] = drawCard(deck);
+  }
+  printHand(starting_player);
+  printf("Cards Drawn: ");
+  printf("%d", faceUp[0].value);
+  printf("%s \n", faceUp[0].actionString);
+
+  printf("Choose the position of the card you want to change(0 - 6)");
+  int position;
+  scanf("%i", &position);
+
+  printf("Choose the card you want to pick: ");
+  int newCardPosition;
+  scanf("%i", &newCardPosition);
+
+  starting_player.hand[position] = faceUp[newCardPosition];
+  printHand(starting_player);
+
+
+  return turn;
 }
 
 /***********************************************************************
@@ -240,7 +255,7 @@ card drawPile[MAX_CARDS];
  ************************************************************************/
 void createRandomDeck(card deck[]) { //if user chooses shuffle deck
     char actions[8][15] =  {"swapAdjacent", "swapOver", "moveRight", "moveLeft", "removeLeft", "removeMiddle", "removeRight", "protect"};
-    char actionStrings[8][3] = {"SS_", "S_S", "M_R", "M_L", "X__", "_X_", "__X", "XXX"};
+    char actionStrings[8][4] = {"SS_", "S_S", "M_R", "M_L", "X__", "_X_", "__X", "XXX"};
     int random;
     for (int i = 0; i < MAX_CARDS; i++) {
       random = rand() % 8;
