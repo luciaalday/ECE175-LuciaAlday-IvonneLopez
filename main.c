@@ -163,52 +163,50 @@ int partition(card cardsarray[], int low, int high) {
 
 /***********************************************************************
  * ROUND (player player_array[], card deck[], card faceUp[])
+ * Note that the commented parts of this section relate to unfinished 
+ * functionality relating to usage and implementation of faceup cards
  ************************************************************************/
 int playRound(player starting_player, card deck[], card faceUp[], int turn) {
-  /*for (int i = 0; i < turn; i++){
-    faceUp[i] = drawCard(deck);
-    if (faceUp[i].value == 100) {
-      return -1;
-    }
-  }*/
-  printf("Available face-up cards: ");
+  /*printf("Available face-up cards: ");
   for (int i = 0; i < 8; i++) {
     if (faceUp[i].action != "\0") {
       printf("%i %s, ", faceUp[i].value, faceUp[i].actionString);
     }
-  }
+  }*/
 
   printHand(starting_player);
-  printf("Enter 'd' to draw a card or 'f' to select from the face-up cards.\n");
+  /*printf("Enter 'd' to draw a card or 'f' to select from the face-up cards.\n");
   char nextMove;
   scanf("%c", &nextMove);
-  if (nextMove == 'd') {
+  if (nextMove == 'd') {*/
     printf("\nCard Drawn: ");
     card tempCard = drawCard(deck);
-    printf("%d", tempCard.value);
+    if (tempCard.value == 100) {        // checks if deck returns value corresponding to an empty drawPile
+      return -1;
+    }
+    printf("%d", tempCard.value);       // show drawn card, play only number value
     printf("%s \n", tempCard.actionString);
 
     printf("Choose the position of the card you want to change(0 - 6)");
-    int position;
+    int position;                       // choose which card from hand will be discarded
     scanf("%i", &position);
 
-    card toFaceUp = starting_player.hand[position];
+    card toFaceUp = starting_player.hand[position];     // discarded card placed into faceUp pile if possible
     if (faceUp[toFaceUp.actionNum].action == "\0") {
       faceUp[toFaceUp.actionNum] = toFaceUp;
-  }
+  /*}
   else if (nextMove == 'f') {
     // face-up option selected and done
   }
   else {
     printf("Invalid move. Next player's turn.");
-  }
+  }*/
 
   starting_player.hand[position] = tempCard;
 
   }
 
   printHand(starting_player);
-
 
   return turn;
 }
@@ -223,7 +221,10 @@ bool checkWin(int SIZE, player player_array[]) {
     length = 0;
     for (int j = 1; j < 7; j++) {
       if (player_array[i].hand[j].value > player_array[i].hand[j-1].value) {
-        length++;
+        length++;                       // adds to length only if curr val > previous
+      }
+      else {
+        break;                          // breaks loop if curr val <= prev
       }
     }
     if (length == 7) {
@@ -281,7 +282,7 @@ card drawPile[MAX_CARDS];
 void createRandomDeck(card deck[]) { //if user chooses shuffle deck
     char actions[8][15] =  {"swapAdjacent", "swapOver", "moveRight", "moveLeft", "removeLeft", "removeMiddle", "removeRight", "protect"};
     char actionStrings[8][4] = {"SS_", "S_S", "M_R", "M_L", "X__", "_X_", "__X", "XXX"};
-    for (int i = 0; i < MAX_CARDS; i++) {
+    for (int i = 0; i < MAX_CARDS; i++) {     // creates MAX_CARDS cards and initializes values
       int random = rand() % 8;
       card temp;
       temp.used = false;
@@ -298,8 +299,8 @@ void createRandomDeck(card deck[]) { //if user chooses shuffle deck
  ************************************************************************/
 void shuffleDeck(card deck[]) {
   card tempCard;
-  for (int i = 0; i < MAX_CARDS; i++) {
-    int temp = rand() % MAX_CARDS;
+  for (int i = 0; i < MAX_CARDS; i++) {     // uses Fisher-Yates shuffling alogrithm
+    int temp = rand() % MAX_CARDS;          // switches the location of cards randomly around twice per card
     tempCard = deck[i];
     deck[i] = deck[temp];
     deck[temp] = tempCard;
@@ -322,16 +323,16 @@ void printAvailableDeck(card deck[]) {
  ************************************************************************/
 card drawCard(card deck[]) {
   int index = rand() % MAX_CARDS;
-  for (int i = 0; i < MAX_CARDS; i++) {
-    if (!deck[i].used) {
-      while (deck[index].used) {
+  for (int i = 0; i < MAX_CARDS; i++) { // checks that at least one card is free to avoid infinite loop
+    if (!deck[i].used) {              
+      while (deck[index].used) {        // if a card is in play it draws again
         index = rand() % MAX_CARDS;
       }
-      deck[index].used = true;
+      deck[index].used = true;          // marks card as used to ensure it isn't drawn twice
       return deck[index];
     }
   }
-  card endGame;
+  card endGame;                         // if drawing a card would result in an infinite loop, returns card with value outside range
   endGame.value = 100;
   return endGame;
 }
@@ -345,7 +346,7 @@ void endGame(player player_array[], int SIZE) {
     player_array[i].len = 0;
     for (int j = 1; j < 7; j++) {
       if (player_array[i].hand[j].value > player_array[i].hand[j - 1].value) {
-        player_array[i].len++;
+        player_array[i].len++;                        // keeps track of length sorted by playerss
       }
     }
     if (player_array[i].len > currMax.len) {
