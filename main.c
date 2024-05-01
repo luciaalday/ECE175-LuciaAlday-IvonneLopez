@@ -39,6 +39,7 @@ int playRound(player starting_player, card deck[], card faceUp[], int turn);
 card drawCard(card deck[]);
 void printHand(player p);
 bool checkWin(int SIZE, player player_array[]);
+void endGame(player player_array[]);
 
 /***********************************************************************
  * MAIN
@@ -80,13 +81,13 @@ int main()
   char discard[5];
   fgets(discard, 5, stdin);
 
-
-  
-  /*delete this later*/
   int starting_index = setup(SIZE, player_array, deck);
 
   while (winner == false){
     for (int i = 0; i < SIZE; i++){
+      if (starting_index < 0) {
+        endGame(player_array);
+      }
       if (starting_index >= SIZE){
         starting_index = 0;
       }
@@ -167,6 +168,9 @@ int partition(card cardsarray[], int low, int high) {
 int playRound(player starting_player, card deck[], card  faceUp[], int turn) {
   for (int i = 0; i < turn; i++){
     faceUp[i] = drawCard(deck);
+    if (faceUp[i].value == 100) {
+      return -1;
+    }
   }
   printHand(starting_player);
   printf("Cards Drawn: ");
@@ -295,10 +299,24 @@ void printAvailableDeck(card deck[]) {
  * DRAW CARD (card deck[]) Returns card
  ************************************************************************/
 card drawCard(card deck[]) {
-  int index = rand() % 84;
-  while (deck[index].used) {
-    index = rand() % 84;
+  int index = rand() % MAX_CARDS;
+  for (int i = 0; i < MAX_CARDS; i++) {
+    if (!deck[i].used) {
+      while (deck[index].used) {
+        index = rand() % MAX_CARDS;
+      }
+      deck[index].used = true;
+      return deck[index];
+    }
   }
-  deck[index].used = true;
-  return deck[index];
+  card endGame;
+  endGame.value = 100;
+  return endGame;
+}
+/***********************************************************************
+ * END GAME (player player_array[]) Returns card
+ ************************************************************************/
+
+void endGame(player player_array[]) {
+
 }
