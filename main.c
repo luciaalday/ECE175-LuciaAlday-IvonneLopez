@@ -20,6 +20,7 @@ typedef struct {
   char action[15];
   bool used;
   char actionString[3];
+  int actionNum;
 } card;
 
 typedef struct {
@@ -111,8 +112,6 @@ int setup(int SIZE, player player_array[], card deck[]){
     printf("Enter player %d name: ", i + 1);
     fgets(player_array[i].name, 30, stdin);
   }
-  /*delete this later*/
-  printAvailableDeck(deck);
 
   for (int p = 0; p < SIZE; p++){
     for (int c = 0; c < 7; c++){
@@ -122,7 +121,6 @@ int setup(int SIZE, player player_array[], card deck[]){
   for (int i = 0; i <= SIZE; i++){
     quicksort(player_array[i].hand, 0, 6);
   } 
-  printAvailableDeck(deck);
 
   for (int p = 0; p < SIZE; p++){
     printHand(player_array[p]);
@@ -166,27 +164,30 @@ int partition(card cardsarray[], int low, int high) {
 /***********************************************************************
  * ROUND (player player_array[], card deck[], card faceUp[])
  ************************************************************************/
-int playRound(player starting_player, card deck[], card  faceUp[], int turn) {
-  for (int i = 0; i < turn; i++){
+int playRound(player starting_player, card deck[], card faceUp[], int turn) {
+  /*for (int i = 0; i < turn; i++){
     faceUp[i] = drawCard(deck);
     if (faceUp[i].value == 100) {
       return -1;
     }
-  }
+  }*/
+  
   printHand(starting_player);
   printf("Cards Drawn: ");
-  printf("%d", faceUp[0].value);
-  printf("%s \n", faceUp[0].actionString);
+  card tempCard = drawCard(deck);
+  printf("%d", tempCard.value);
+  printf("%s \n", tempCard.actionString);
 
   printf("Choose the position of the card you want to change(0 - 6)");
   int position;
   scanf("%i", &position);
 
-  printf("Choose the card you want to pick: ");
-  int newCardPosition;
-  scanf("%i", &newCardPosition);
+  card toFaceUp = starting_player.hand[position];
+  if (faceUp[toFaceUp.actionNum].action == "\0") {
+    faceUp[toFaceUp.actionNum] = toFaceUp;
+  }
 
-  starting_player.hand[position] = faceUp[newCardPosition];
+  starting_player.hand[position] = tempCard;
   printHand(starting_player);
 
 
@@ -266,6 +267,7 @@ void createRandomDeck(card deck[]) { //if user chooses shuffle deck
       card temp;
       temp.used = false;
       temp.value = i;
+      temp.actionNum = random;
       strcpy(temp.action, actions[random]);
       strcpy(temp.actionString, actionStrings[random]);
       deck[i] = temp;
