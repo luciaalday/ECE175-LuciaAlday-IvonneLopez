@@ -24,7 +24,8 @@ typedef struct {
 
 typedef struct {
   card hand[7];
-  char name[20]; 
+  char name[20];
+  int len;
 } player;
 
 int setup(int SIZE, player player_array[], card deck[]);
@@ -318,5 +319,17 @@ card drawCard(card deck[]) {
  ************************************************************************/
 
 void endGame(player player_array[]) {
-
+  player currMax = player_array[0];
+  for (int i = 0; i < sizeof(player_array); i++) {
+    player_array[i].len = 0;
+    for (int j = 1; j < 7; j++) {
+      if (player_array[i].hand[j].value > player_array[i].hand[j - 1].value) {
+        player_array[i].len++;
+      }
+    }
+    if (player_array[i].len > currMax.len) {
+      currMax = player_array[i];
+    }
+  }
+  printf("Draw pile has run out. %s had the longest train. Congratulations!", currMax.name);
 }
