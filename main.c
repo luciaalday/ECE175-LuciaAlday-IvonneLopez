@@ -19,7 +19,7 @@ typedef struct {
   int value;                
   char action[15];
   bool used;            // whether or not card can be drawn from drawPile (deck)
-  char actionString[3]; // shortened version of action for display
+  char actionString[4]; // shortened version of action for display
   int actionNum;        // index of action within faceUp line up
 } card;
 
@@ -37,7 +37,7 @@ void cardsfile();
 void shuffleDeck(card deck[]);
 void createRandomDeck(card deck[]);
 void printAvailableDeck(card deck[]);
-int playRound(player starting_player, card deck[], card faceUp[], int turn);
+int playRound(player starting_player, card deck[], card faceUp[], int hasFaceUp[], int turn);
 card drawCard(card deck[]);
 void printHand(player p);
 bool checkWin(int SIZE, player player_array[]);
@@ -52,6 +52,7 @@ int main()
 {
   card deck[MAX_CARDS];
   card faceUp[8];
+  int hasFaceUp[8] = {0, 0, 0, 0, 0, 0, 0, 0};  // keeps track of whether action is in faceUp pile
   int SIZE; //players 
   char choice;
   printf("Enter 'f' if to play you want to insert a file or enter 's' if you want to shuffle the deck: ");
@@ -93,7 +94,7 @@ int main()
       if (starting_index >= SIZE){
         starting_index = 0;
       }
-      starting_index = playRound(player_array[starting_index], deck, faceUp, i+1);
+      starting_index = playRound(player_array[starting_index], deck, faceUp, hasFaceUp, i+1);
     }
 
     if (checkWin(SIZE, player_array)) {
@@ -110,7 +111,7 @@ int main()
 int setup(int SIZE, player player_array[], card deck[]){
   for (int i = 0; i < SIZE; i++) {
     printf("Enter player %d name: ", i + 1);
-    fgets(player_array[i].name, 30, stdin);
+    fgets(player_array[i].name, 20, stdin);
   }
 
   for (int p = 0; p < SIZE; p++){             // generate starting hand of cards for each player
@@ -166,19 +167,20 @@ int partition(card cardsarray[], int low, int high) {
  * Note that the commented parts of this section relate to unfinished 
  * functionality relating to usage and implementation of faceup cards
  ************************************************************************/
-int playRound(player starting_player, card deck[], card faceUp[], int turn) {
-  /*printf("Available face-up cards: ");
+int playRound(player starting_player, card deck[], card faceUp[], int hasFaceUp[], int turn) {
+  printf("Available face-up cards: ");
   for (int i = 0; i < 8; i++) {
-    if (faceUp[i].action != "\0") {
+    if (hasFaceUp[i] == 1) {
       printf("%i %s, ", faceUp[i].value, faceUp[i].actionString);
     }
-  }*/
+  }
+  printf("\n");
 
   printHand(starting_player);
-  /*printf("Enter 'd' to draw a card or 'f' to select from the face-up cards.\n");
+  printf("Enter 'd' to draw a card or 'f' to select from the face-up cards.\n");
   char nextMove;
   scanf("%c", &nextMove);
-  if (nextMove == 'd') {*/
+  if (nextMove == 'd') {
     printf("\nCard Drawn: ");
     card tempCard = drawCard(deck);
     if (tempCard.value == 100) {        // checks if deck returns value corresponding to an empty drawPile
@@ -192,9 +194,14 @@ int playRound(player starting_player, card deck[], card faceUp[], int turn) {
     scanf("%i", &position);
 
     card toFaceUp = starting_player.hand[position];     // discarded card placed into faceUp pile if possible
-    if (faceUp[toFaceUp.actionNum].action == "\0") {
+    if (hasFaceUp[toFaceUp.actionNum] == 0) {
       faceUp[toFaceUp.actionNum] = toFaceUp;
-  /*}
+      hasFaceUp[toFaceUp.actionNum] = 1;
+    }
+    else {
+      hasFaceUp[toFaceUp.actionNum] = 0;
+    }
+  /*
   else if (nextMove == 'f') {
     // face-up option selected and done
   }
@@ -215,10 +222,9 @@ int playRound(player starting_player, card deck[], card faceUp[], int turn) {
  * CHECK WIN (player player_array[]) Returns boolean
  ************************************************************************/
 bool checkWin(int SIZE, player player_array[]) {
-  int length;
   bool winner = false;
   for (int i = 0; i < SIZE; i++) {
-    length = 0;
+    int length = 0;
     for (int j = 1; j < 7; j++) {
       if (player_array[i].hand[j].value > player_array[i].hand[j-1].value) {
         length++;                       // adds to length only if curr val > previous
