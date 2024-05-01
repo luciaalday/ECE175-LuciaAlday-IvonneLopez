@@ -16,17 +16,17 @@
 #define MAX_CARDS 84
 
 typedef struct {
-  int value;
+  int value;                
   char action[15];
-  bool used;
-  char actionString[3];
-  int actionNum;
+  bool used;            // whether or not card can be drawn from drawPile (deck)
+  char actionString[3]; // shortened version of action for display
+  int actionNum;        // index of action within faceUp line up
 } card;
 
 typedef struct {
   card hand[7];
   char name[20];
-  int len;
+  int len;              // length of sorted cards starting from index 0, determined if deck has no cards which can be drawn
 } player;
 
 int setup(int SIZE, player player_array[], card deck[]);
@@ -46,7 +46,7 @@ void endGame(player player_array[], int SIZE);
 /***********************************************************************
  * MAIN
  * 
- * creates deck
+ * creates arrays and passes functions for gameplay
  ************************************************************************/
 int main()
 {
@@ -85,9 +85,9 @@ int main()
 
   int starting_index = setup(SIZE, player_array, deck);
 
-  while (winner == false){
+  while (winner == false){            // gameplay continues until someone has won
     for (int i = 0; i < SIZE; i++){
-      if (starting_index < 0) {
+      if (starting_index < 0) {       // gameplay ends if deck has no cards that can be drawn
         endGame(player_array, SIZE);
       }
       if (starting_index >= SIZE){
@@ -113,20 +113,20 @@ int setup(int SIZE, player player_array[], card deck[]){
     fgets(player_array[i].name, 30, stdin);
   }
 
-  for (int p = 0; p < SIZE; p++){
+  for (int p = 0; p < SIZE; p++){             // generate starting hand of cards for each player
     for (int c = 0; c < 7; c++){
       player_array[p].hand[c] = drawCard(deck);
     }
   }
-  for (int i = 0; i <= SIZE; i++){
+  for (int i = 0; i <= SIZE; i++){            // sort each players cards in ascending order
     quicksort(player_array[i].hand, 0, 6);
   } 
 
-  for (int p = 0; p < SIZE; p++){
+  for (int p = 0; p < SIZE; p++){             // print each players hand
     printHand(player_array[p]);
   }
 
-  return rand() % SIZE;
+  return rand() % SIZE;                       // return random starting player
   //while(){
   //player[i][j] = 0;
   
