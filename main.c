@@ -18,6 +18,7 @@
 typedef struct {
   int value;                
   char action[15];
+  bool protected;       // whether or not card is protected
   bool used;            // whether or not card can be drawn from drawPile (deck)
   char actionString[4]; // shortened version of action for display
   int actionNum;        // index of action within faceUp line up
@@ -223,9 +224,51 @@ int playRound(player starting_player, card deck[], card faceUp[], int hasFaceUp[
 }
 
 /***********************************************************************
- * FACEUP PLAYS SERIES (card action, player player)
+ * FACEUP PLAYS SERIES (char action[], card hand[])
  ************************************************************************/
+void SwapAdjacent(char action[], card hand[]) {
+  // asks user which card (0-5) to swap with the one to its right
+  int index;
+  printf("Enter which card (position 0-5) to swap with the card to its right: ");
+  scanf(" %c", &index);
+  card temp = hand[index];
+  hand[index] = hand[index + 1];
+  hand[index + 1] = temp;  
+} 
 
+void SwapOverOne(char action[], card hand[]) {
+  // asks user which card (0-4) to swap with the one two to its right
+  int index;
+  printf("Enter which card (position 0-4) to swap with the card two to its right: ");
+  scanf(" %i", &index);
+  card temp = hand[index];
+  hand[index] = hand[index + 2];
+  hand[index + 2] = temp;
+} 
+
+void Protect(char action[], card hand[]) {
+  // asks user which card to protect (bool protect to true)
+  int index;
+  printf("Enter the position (0, 3, or 6) of the card you would like to protect: ");
+  scanf(" %i", &index);
+  hand[index].protected = true;
+} 
+
+void MoveLeft(char action[], card hand[]) {
+  //asks player which card (2-6) to move 2 spaces left
+  int index;
+  printf("Enter the position (2-6) of the card you would like to move 2 spaces left: ");
+  scanf(" %c", &index);
+  card temp = hand[index];
+} 
+
+void MoveRight(char action[], card hand[]) {
+  // asks player which card (0-4) to move 2 spaces right
+  int index;
+  printf("Enter the position (0-4) of the card you would like to move 2 spaces right: ");
+  scanf(" %c", &index);
+  card temp = hand[index];
+}
 
 /***********************************************************************
  * CHECK WIN (player player_array[]) Returns boolean
