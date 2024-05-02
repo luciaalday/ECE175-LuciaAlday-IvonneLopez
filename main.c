@@ -3,9 +3,8 @@
  * authors: Lucia Alday and Ivonne Lopez
  * course: ECE 175 Spring 2024
  * Game of Trains play and specifications:
- *** (gameplay and rules and how theyre implemented)
- *** (card struct)
- *** (deck struct)
+ * 
+ * Extra credit: 1. personalization, 3. additional players, 5. graphics
  ********************************************************************/
 
 #include <stdio.h>
@@ -48,7 +47,7 @@ void endGame(player player_array[], int SIZE);
  * MAIN
  * 
  * creates arrays and passes functions for gameplay
- ************************************************************************/
+ ***********************************************************************/
 int main()
 {
   card deck[MAX_CARDS];
@@ -107,7 +106,7 @@ int main()
 
 /***********************************************************************
  * SETUP (int SIZE, plaer player_array[])
- ************************************************************************/
+ ***********************************************************************/
 int setup(int SIZE, player player_array[], card deck[]){
   for (int i = 0; i < SIZE; i++) {
     printf("Enter player %d name: ", i + 1);
@@ -164,7 +163,7 @@ int partition(card cardsarray[], int low, int high) {
 
 /***********************************************************************
  * ROUND (player player_array[], card deck[], card faceUp[])
- ************************************************************************/
+ ***********************************************************************/
 int playRound(player starting_player, card deck[], card faceUp[], int hasFaceUp[], int turn) {
   printf("Available face-up cards: ");
   for (int i = 0; i < 8; i++) {
@@ -225,7 +224,7 @@ int playRound(player starting_player, card deck[], card faceUp[], int hasFaceUp[
 
 /***********************************************************************
  * FACEUP PLAYS SERIES (char action[], card hand[])
- ************************************************************************/
+ ***********************************************************************/
 void SwapAdjacent(char action[], card hand[]) {
   // asks user which card (0-5) to swap with the one to its right
   int index;
@@ -260,6 +259,9 @@ void MoveLeft(char action[], card hand[]) {
   printf("Enter the position (2-6) of the card you would like to move 2 spaces left: ");
   scanf(" %c", &index);
   card temp = hand[index];
+  hand[index] = hand[index - 1];
+  hand[index - 1] = hand[index - 2];
+  hand[index - 2] = temp;
 } 
 
 void MoveRight(char action[], card hand[]) {
@@ -268,11 +270,14 @@ void MoveRight(char action[], card hand[]) {
   printf("Enter the position (0-4) of the card you would like to move 2 spaces right: ");
   scanf(" %c", &index);
   card temp = hand[index];
+  hand[index] = hand[index + 1];
+  hand[index + 1] = hand[index + 2];
+  hand[index + 2] = temp;
 }
 
 /***********************************************************************
  * CHECK WIN (player player_array[]) Returns boolean
- ************************************************************************/
+ ***********************************************************************/
 bool checkWin(int SIZE, player player_array[]) {
   bool winner = false;
   for (int i = 0; i < SIZE; i++) {
@@ -295,7 +300,7 @@ bool checkWin(int SIZE, player player_array[]) {
 
 /***********************************************************************
  * PRINT HAND (player p)
- ************************************************************************/
+ ***********************************************************************/
 void printHand(player p) {
   printf("%s \n   OOo Oo o\n  O________________________________________________\n ||", p.name);
   for (int i = 0; i < 7; i++) {
@@ -316,7 +321,7 @@ void printHand(player p) {
 
 /***********************************************************************
  * CARDS FILE - creates deck from file
- ************************************************************************/
+ ***********************************************************************/
 void cardsfile(char *filename){ //if user enters file 
 card drawPile[MAX_CARDS];
   FILE *in;
@@ -351,7 +356,7 @@ card drawPile[MAX_CARDS];
 
 /***********************************************************************
  * CREATE RANDOM DECK (card deck[]) //empty deck
- ************************************************************************/
+ ***********************************************************************/
 void createRandomDeck(card deck[]) { //if user chooses shuffle deck
     char actions[8][15] =  {"swapAdjacent", "swapOver", "moveRight", "moveLeft", "removeLeft", "removeMiddle", "removeRight", "protect"};
     char actionStrings[8][4] = {"SS_", "S_S", "M_R", "M_L", "X__", "_X_", "__X", "XXX"};
@@ -369,7 +374,7 @@ void createRandomDeck(card deck[]) { //if user chooses shuffle deck
 
 /***********************************************************************
  * SHUFFLE DECK (card deck[])
- ************************************************************************/
+ ***********************************************************************/
 void shuffleDeck(card deck[]) {
   card tempCard;
   for (int i = 0; i < MAX_CARDS; i++) {     // uses Fisher-Yates shuffling alogrithm
@@ -382,7 +387,7 @@ void shuffleDeck(card deck[]) {
 
 /***********************************************************************
  * PRINT DECK - used to test functionality (not in gameplay)
- ************************************************************************/
+ ***********************************************************************/
 void printAvailableDeck(card deck[]) {
   for (int i = 0; i < MAX_CARDS; i++) {
     if (!deck[i].used) {
@@ -393,7 +398,7 @@ void printAvailableDeck(card deck[]) {
 
 /***********************************************************************
  * DRAW CARD (card deck[]) Returns card
- ************************************************************************/
+ ***********************************************************************/
 card drawCard(card deck[]) {
   int index = rand() % MAX_CARDS;
   for (int i = 0; i < MAX_CARDS; i++) { // checks that at least one card is free to avoid infinite loop
@@ -412,7 +417,7 @@ card drawCard(card deck[]) {
 
 /***********************************************************************
  * END GAME (player player_array[]) Returns card
- ************************************************************************/
+ ***********************************************************************/
 void endGame(player player_array[], int SIZE) {
   player currMax = player_array[0];
   for (int i = 0; i < SIZE; i++) {
