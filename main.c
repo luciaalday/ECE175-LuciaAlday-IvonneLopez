@@ -129,7 +129,6 @@ int setup(int SIZE, player player_array[], card deck[]){
   return rand() % SIZE;                       // return random starting player
   //while(){
   //player[i][j] = 0;
-  
  }
 
 void quicksort(card cardsarray[], int low, int high) {
@@ -211,7 +210,22 @@ int playRound(player starting_player, card deck[], card faceUp[], int hasFaceUp[
     starting_player.hand[position] = tempCard;
   }  
   else if (nextMove == 'f') {         // if player chooses to select a faceUp card
-    // face-up option selected and done
+    int index;
+    int i = 0;
+    int j = 0;
+    printf("Enter which face up card you'd like to play: (1 - current number of face up cards)");
+    scanf(" %i", &index);
+    while (i < index) {       // retrieve selected faceUp card, counting only from cards shown
+      if (j > 7) {
+        printf("Index out of range.\n");
+        break;
+      }
+      if (hasFaceUp[j] == 1) {
+        i++;
+      }
+      j++;
+    }
+    printf("%s\n", faceUp[i]);
   }
   else {
     printf("Invalid move. Next player's turn.");
