@@ -226,8 +226,8 @@ int playRound(player starting_player, card deck[], card faceUp[], int hasFaceUp[
     int j = 0;
     printf("Enter which face up card you'd like to play: (1 - current number of face up cards)");
     scanf(" %d", &index);
-    while (i < index) {       // retrieve selected faceUp card, counting only from cards shown
-      if (j > 7) {            // 
+    while (i < index - 1) {       // retrieve selected faceUp card, counting only from cards shown
+      if (j >= 8) {
         printf("Index out of range.\n");
         break;
       }
@@ -237,7 +237,7 @@ int playRound(player starting_player, card deck[], card faceUp[], int hasFaceUp[
       j++;
     }
     printf("\nYou chose to %s\n", faceUp[i].action);
-    hasFaceUp[j] = 0;   // set selected faceUp card as used
+    hasFaceUp[faceUp[i].actionNum] = 0;   // set selected faceUp card as used
     if (faceUp[i].actionNum == 0) {       //calls function to swap adjacent cards
       SwapAdjacent(starting_player.hand);
     }
@@ -310,7 +310,7 @@ void SwapAdjacent(card hand[]) {
   // asks user which card (0-5) to swap with the one to its right
   int index;
   printf("Enter which card (position 0-5) to swap with the card to its right: ");
-  scanf(" %c", &index);
+  scanf(" %d", &index);
   card temp = hand[index];
   hand[index] = hand[index + 1];
   hand[index + 1] = temp;  
@@ -320,7 +320,7 @@ void SwapOverOne(card hand[]) {
   // asks user which card (0-4) to swap with the one two to its right
   int index;
   printf("Enter which card (position 0-4) to swap with the card two to its right: ");
-  scanf(" %i", &index);
+  scanf(" %d", &index);
   card temp = hand[index];
   hand[index] = hand[index + 2];
   hand[index + 2] = temp;
@@ -330,7 +330,7 @@ void Protect(card hand[]) {
   // asks user which card to protect (bool protect to true)
   int index;
   printf("Enter the position (0, 3, or 6) of the card you would like to protect: ");
-  scanf(" %i", &index);
+  scanf(" %d", &index);
   hand[index].protected = true;
 } 
 
@@ -338,7 +338,7 @@ void MoveLeft(card hand[]) {
   //asks player which card (2-6) to move 2 spaces left
   int index;
   printf("Enter the position (2-6) of the card you would like to move 2 spaces left: ");
-  scanf(" %c", &index);
+  scanf(" %d", &index);
   card temp = hand[index];
   hand[index] = hand[index - 1];
   hand[index - 1] = hand[index - 2];
