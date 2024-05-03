@@ -37,11 +37,17 @@ void cardsfile();
 void shuffleDeck(card deck[]);
 void createRandomDeck(card deck[]);
 void printAvailableDeck(card deck[]);
-int playRound(player starting_player, card deck[], card faceUp[], int hasFaceUp[], int turn);
+int playRound(player starting_player, card deck[], card faceUp[], int hasFaceUp[], int turn, player player_array[], int SIZE);
 card drawCard(card deck[]);
 void printHand(player p);
 bool checkWin(int SIZE, player player_array[]);
 void endGame(player player_array[], int SIZE);
+void SwapAdjacent(card hand[]);
+void SwapOverOne(card hand[]);
+void Protect(card hand[]);
+void MoveLeft(card hand[]);
+void MoveRight(card hand[]);
+void AddToFaceUp(int hasFaceUp[],  card toFaceUp, card faceUp[]);
 
 /***********************************************************************
  * MAIN
@@ -93,7 +99,7 @@ int main()
       if (starting_index >= SIZE){
         starting_index = 0;
       }
-      starting_index = playRound(player_array[starting_index], deck, faceUp, hasFaceUp, i+1);
+      starting_index = playRound(player_array[starting_index], deck, faceUp, hasFaceUp, i+1, player_array, SIZE);
     }
 
     if (checkWin(SIZE, player_array)) {
@@ -163,7 +169,11 @@ int partition(card cardsarray[], int low, int high) {
 /***********************************************************************
  * ROUND (player player_array[], card deck[], card faceUp[])
  ***********************************************************************/
-int playRound(player starting_player, card deck[], card faceUp[], int hasFaceUp[], int turn) {
+int playRound(player starting_player, card deck[], card faceUp[], int hasFaceUp[], int turn, player player_array[], int SIZE) {
+  int lenName = strlen(starting_player.name) - 1;
+  char playerName[lenName];
+  strncpy(playerName, starting_player.name, lenName);
+  printf("%s's turn:\n", playerName);
   printf("Available face-up cards: ");
   for (int i = 0; i < 8; i++) {
     if (hasFaceUp[i] == 1) {
@@ -180,7 +190,8 @@ int playRound(player starting_player, card deck[], card faceUp[], int hasFaceUp[
     if (hasFaceUp[i] == 1) {
       hasChoice = true;             // player gets to choose whether to pick up card or draw
       printf("Enter 'd' to draw a card or 'f' to select from the face-up cards.\n");
-      scanf("%c", &nextMove);
+      scanf(" %c", &nextMove);
+      break;
     }
   }
   if (!hasChoice) {           // no faceUp cards, must draw from deck
@@ -197,7 +208,7 @@ int playRound(player starting_player, card deck[], card faceUp[], int hasFaceUp[
 
     printf("Choose the position of the card you want to change(0 - 6)");
     int position;                       // choose which card from hand will be discarded
-    scanf("%i", &position);
+    scanf(" %i", &position);
 
     card toFaceUp = starting_player.hand[position];     // discarded card placed into faceUp pile if possible
     if (hasFaceUp[toFaceUp.actionNum] == 0) {
@@ -214,9 +225,9 @@ int playRound(player starting_player, card deck[], card faceUp[], int hasFaceUp[
     int i = 0;
     int j = 0;
     printf("Enter which face up card you'd like to play: (1 - current number of face up cards)");
-    scanf(" %i", &index);
+    scanf(" %d", &index);
     while (i < index) {       // retrieve selected faceUp card, counting only from cards shown
-      if (j > 7) {
+      if (j > 7) {            // 
         printf("Index out of range.\n");
         break;
       }
@@ -225,7 +236,50 @@ int playRound(player starting_player, card deck[], card faceUp[], int hasFaceUp[
       }
       j++;
     }
-    printf("%s\n", faceUp[i]);
+    printf("\nYou chose to %s\n", faceUp[i].action);
+    hasFaceUp[j] = 0;   // set selected faceUp card as used
+    if (faceUp[i].actionNum == 0) {       //calls function to swap adjacent cards
+      SwapAdjacent(starting_player.hand);
+    }
+    else if (faceUp[i].actionNum == 1) {  // call to swap cards separated by one
+      SwapOverOne(starting_player.hand);
+    }
+    else if (faceUp[i].actionNum == 2) {  // call to move a card two to thre right
+      MoveRight(starting_player.hand);
+    }
+    else if (faceUp[i].actionNum == 3) {  // call to move a card two to the left
+      MoveLeft(starting_player.hand);
+    }
+    else if (faceUp[i].actionNum == 7) {  // call to protect a card
+      Protect(starting_player.hand);
+    }
+    else {                                // call to remove left, middle, or right card from other players' hands
+      for (int k = 0; k < SIZE; k++) {
+        if (strcmp(starting_player.name, player_array[k].name) != 0) {
+          if (faceUp[i].actionNum == 4) {
+            if (!player_array[k].hand[0].protected) {
+              card temp = player_array[k].hand[0];    // original card from hand goes to faceUp pile
+              AddToFaceUp(hasFaceUp, temp, faceUp);
+              player_array[k].hand[0] = drawCard(deck); // player hand gets random card in its place
+            }
+          }
+          else if (faceUp[i].actionNum == 5) {
+            if (!player_array[k].hand[0].protected) {
+              card temp = player_array[k].hand[3];
+              AddToFaceUp(hasFaceUp, temp, faceUp);
+              player_array[k].hand[3] = drawCard(deck);
+            }
+          }
+          else {
+            if (!player_array[k].hand[0].protected) {
+              card temp = player_array[k].hand[6];
+              AddToFaceUp(hasFaceUp, temp, faceUp);
+              player_array[k].hand[6] = drawCard(deck);
+            }
+          }
+        }
+      }
+    }
   }
   else {
     printf("Invalid move. Next player's turn.");
@@ -239,7 +293,20 @@ int playRound(player starting_player, card deck[], card faceUp[], int hasFaceUp[
 /***********************************************************************
  * FACEUP PLAYS SERIES (char action[], card hand[])
  ***********************************************************************/
-void SwapAdjacent(char action[], card hand[]) {
+void AddToFaceUp(int hasFaceUp[],  card toFaceUp, card faceUp[]) {
+  if (hasFaceUp[toFaceUp.actionNum] == 0) {
+    faceUp[toFaceUp.actionNum] = toFaceUp;
+    hasFaceUp[toFaceUp.actionNum] = 1;
+  }
+  else {
+    hasFaceUp[toFaceUp.actionNum] = 0;
+  }
+}
+
+/***********************************************************************
+ * FACEUP PLAYS SERIES (char action[], card hand[])
+ ***********************************************************************/
+void SwapAdjacent(card hand[]) {
   // asks user which card (0-5) to swap with the one to its right
   int index;
   printf("Enter which card (position 0-5) to swap with the card to its right: ");
@@ -249,7 +316,7 @@ void SwapAdjacent(char action[], card hand[]) {
   hand[index + 1] = temp;  
 } 
 
-void SwapOverOne(char action[], card hand[]) {
+void SwapOverOne(card hand[]) {
   // asks user which card (0-4) to swap with the one two to its right
   int index;
   printf("Enter which card (position 0-4) to swap with the card two to its right: ");
@@ -259,7 +326,7 @@ void SwapOverOne(char action[], card hand[]) {
   hand[index + 2] = temp;
 } 
 
-void Protect(char action[], card hand[]) {
+void Protect(card hand[]) {
   // asks user which card to protect (bool protect to true)
   int index;
   printf("Enter the position (0, 3, or 6) of the card you would like to protect: ");
@@ -267,7 +334,7 @@ void Protect(char action[], card hand[]) {
   hand[index].protected = true;
 } 
 
-void MoveLeft(char action[], card hand[]) {
+void MoveLeft(card hand[]) {
   //asks player which card (2-6) to move 2 spaces left
   int index;
   printf("Enter the position (2-6) of the card you would like to move 2 spaces left: ");
@@ -278,7 +345,7 @@ void MoveLeft(char action[], card hand[]) {
   hand[index - 2] = temp;
 } 
 
-void MoveRight(char action[], card hand[]) {
+void MoveRight(card hand[]) {
   // asks player which card (0-4) to move 2 spaces right
   int index;
   printf("Enter the position (0-4) of the card you would like to move 2 spaces right: ");
